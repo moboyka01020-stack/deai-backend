@@ -1,21 +1,22 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path'); // أداة للتعامل مع مسارات الملفات
 
 const app = express();
 
-// السماح لموقعك بالتواصل مع السيرفر
 app.use(cors());
 app.use(express.json());
 
+// ✅ السطر السحري: بيخلي السيرفر يعرض ملفات الـ HTML والـ CSS اللي معاه في الفولدر
+app.use(express.static(path.join(__dirname, './')));
+
 const PORT = process.env.PORT || 3000;
 
-// الرابط الآمن الذي سيستقبل الأسئلة
+// رابط المحادثة (الذكاء الاصطناعي)
 app.post('/api/chat', async (req, res) => {
     try {
         const { messages, model } = req.body;
-
-        // السيرفر هو من يتواصل مع Groq ويستخدم المفتاح المخفي
         const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
             headers: {
@@ -30,8 +31,6 @@ app.post('/api/chat', async (req, res) => {
         });
 
         const data = await response.json();
-        
-        // إرجاع الرد للمريض
         res.json(data);
     } catch (error) {
         console.error("Server Error:", error);
@@ -39,7 +38,11 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
-// تشغيل السيرفر
+// ✅ تعديل: لو المريض فتح الرابط الرئيسي، ابعتله ملف index.html فوراً
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 app.listen(PORT, () => {
-    console.log(`🚀 سيرفر DEAI يعمل بنجاح على الرابط: http://localhost:${PORT}`);
+    console.log(`🚀 DEAI Live on port ${PORT}`);
 });
