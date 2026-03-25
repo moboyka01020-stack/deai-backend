@@ -1,19 +1,17 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const path = require('path'); // أداة للتعامل مع مسارات الملفات
+const path = require('path');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// ✅ السطر السحري: بيخلي السيرفر يعرض ملفات الـ HTML والـ CSS اللي معاه في الفولدر
+// تشغيل الملفات الثابتة (index.html)
 app.use(express.static(path.join(__dirname, './')));
 
-const PORT = process.env.PORT || 3000;
-
-// رابط المحادثة (الذكاء الاصطناعي)
+// الرابط الخاص بالذكاء الاصطناعي
 app.post('/api/chat', async (req, res) => {
     try {
         const { messages, model } = req.body;
@@ -31,18 +29,17 @@ app.post('/api/chat', async (req, res) => {
         });
 
         const data = await response.json();
-        res.json(data);
+        res.status(200).json(data);
     } catch (error) {
         console.error("Server Error:", error);
-        res.status(500).json({ error: "حدث خطأ في السيرفر" });
+        res.status(500).json({ error: "خطأ في الاتصال بالذكاء الاصطناعي" });
     }
 });
 
-// ✅ تعديل: لو المريض فتح الرابط الرئيسي، ابعتله ملف index.html فوراً
-app.get('*', (req, res) => {
+// توجيه أي طلب آخر لفتح صفحة index.html
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.listen(PORT, () => {
-    console.log(`🚀 DEAI Live on port ${PORT}`);
-});
+// تصدير التطبيق لـ Vercel (مهم جداً!)
+module.exports = app;
